@@ -1,0 +1,8 @@
+{
+  "name": "ApexStride",
+  "description": "Aplikasi lari atletik modern dengan fitur 1 putaran = 400 meter, pelacakan GPS, stadium gauge interaktif, rute 3D, dan audio coach.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

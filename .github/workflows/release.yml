@@ -1,0 +1,65 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Build Debug & Release APK
+        run: ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
+
+      - name: Find and Prepare APK
+        id: apk_finder
+        run: |
+          mkdir -p release_apks
+          find app/build/outputs/apk -name "*.apk" -exec cp {} release_apks/ \;
+          echo "Found APK files:"
+          ls -la release_apks/
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: release_apks/*.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_apks/*.apk
+          tag_name: ${{ github.ref_name }}
+          name: "Apex Stride Release ${{ github.ref_name }}"
+          body: |
+            ## 🏃‍♂️ Apex Stride APK Release
+            
+            Aplikasi pelacak lari atletik mandiri:
+            - **Pelacakan GPS Presisi**: Hanya menghitung perpindahan nyata saat berlari/berjalan (bukan ayunan tangan di tempat).
+            - **Peta Rute 3D Interaktif**: Visualisasi rute dan elevasi dengan heatmap kecepatan 3 dimensi.
+            - **Analisis Kinerja Atletik**: VO2 Max estimate, zona detak jantung, kalkulator pace & split lomba.
+            - **Riwayat & Jurnal Pribadi**: Catatan latihan lokal Room & sinkronisasi privat.
+            
+            Unduh file `.apk` di bawah dan pasang di perangkat Android Anda.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
