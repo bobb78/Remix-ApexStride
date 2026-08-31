@@ -12,6 +12,8 @@ jobs:
   build:
     name: Build Android Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -28,12 +30,23 @@ jobs:
 
       - name: Ensure Environment & Keystore
         run: |
-          if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+          if [ -f ".env.example" ]; then
             cp .env.example .env
+          else
+            touch .env
           fi
-          if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
-            base64 --decode debug.keystore.base64 > debug.keystore || true
+          touch .env.example
+          
+          # Decode keystore if base64 file exists, or generate fallback with keytool
+          if [ -f "debug.keystore.base64" ]; then
+            base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || true
           fi
+          
+          if [ ! -f "debug.keystore" ] || [ ! -s "debug.keystore" ]; then
+            echo "Generating valid debug.keystore via keytool..."
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          
           if [ ! -f "gradlew" ]; then
             echo "gradlew not found, generating wrapper..."
             gradle wrapper || true
@@ -42,7 +55,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --no-configuration-cache --stacktrace
 
       - name: Find and Prepare APK
         id: apk_finder
