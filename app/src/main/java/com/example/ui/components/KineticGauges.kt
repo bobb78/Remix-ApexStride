@@ -78,7 +78,7 @@ fun TrackStadiumLapGauge(
         label = "lapProgress"
     )
 
-    val remainingMeters = (400.0 - currentLapMeters).coerceAtLeast(0.0).toInt()
+    val remainingMeters = (100.0 - currentLapMeters).coerceAtLeast(0.0).toInt()
     val min = currentLapDurationSeconds / 60
     val sec = currentLapDurationSeconds % 60
     val lapTimeStr = String.format(Locale.US, "%02d:%02d", min, sec)
@@ -92,7 +92,7 @@ fun TrackStadiumLapGauge(
             val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
             val topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f)
 
-            // 1. Stadium 400m outer running ring background
+            // 1. Stadium 100m outer running ring background
             drawArc(
                 color = SurfaceElevated.copy(alpha = 0.7f),
                 startAngle = -90f,
@@ -114,7 +114,7 @@ fun TrackStadiumLapGauge(
                 style = Stroke(width = 2f)
             )
 
-            // 3. Active 400m track sweep progress (NeonLime to ElectricCyan)
+            // 3. Active 100m track sweep progress (NeonLime to ElectricCyan)
             val sweep = animatedProgress * 360f
             if (sweep > 1f) {
                 val brush = Brush.sweepGradient(
@@ -157,7 +157,7 @@ fun TrackStadiumLapGauge(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "PUTARAN 400M",
+                    text = "PUTARAN 100M",
                     style = MaterialTheme.typography.labelSmall,
                     color = NeonLime,
                     fontWeight = FontWeight.Bold,
@@ -186,9 +186,9 @@ fun TrackStadiumLapGauge(
                 }
             }
 
-            // Distance in 400m
+            // Distance in 100m
             Text(
-                text = "${currentLapMeters.toInt()}m / 400m",
+                text = "${currentLapMeters.toInt()}m / 100m",
                 style = MaterialTheme.typography.titleMedium,
                 color = AcidYellow,
                 fontWeight = FontWeight.Bold
@@ -249,7 +249,7 @@ fun TrackLapsBarChart(
                         .background(AcidYellow)
                 )
                 Text(
-                    text = "REKAP PUTARAN (1 PUTARAN = 400M)",
+                    text = "REKAP PUTARAN (1 PUTARAN = 100M)",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextSecondary,
                     fontWeight = FontWeight.Bold,

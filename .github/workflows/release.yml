@@ -77,17 +77,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release_apks/*.apk
-          tag_name: v1.0.0
-          name: "Apex Stride APK Release v1.0.0"
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.0.0' }}
+          name: "Apex Stride APK Release v2.0.0"
           prerelease: false
           body: |
-            ## 🏃‍♂️ Apex Stride APK Release
+            ## 🏃‍♂️ Apex Stride APK Release v2.0.0
             
-            Aplikasi pelacak lari atletik mandiri:
-            - **Pelacakan GPS Presisi**: Hanya menghitung perpindahan nyata saat berlari/berjalan (bukan ayunan tangan di tempat).
-            - **Peta Rute 3D Interaktif**: Visualisasi rute dan elevasi dengan heatmap kecepatan 3 dimensi.
-            - **Analisis Kinerja Atletik**: VO2 Max estimate, zona detak jantung, kalkulator pace & split lomba.
-            - **Riwayat & Jurnal Pribadi**: Catatan latihan lokal Room & sinkronisasi privat.
+            Pembaruan besar Apex Stride v2.0.0 dengan fitur performa & UI baru:
+            - **Mode Latihan Track 100M**: Pengukur putaran presisi tinggi dengan target putaran dinamis, ring speedometer stadion, dan sensor GPS akurat.
+            - **Grafik Progresi Pace Interaktif (Recharts Style)**: Kurva tren kecepatan lari halus dengan area gradien, sumbu kisi, dan touch scrubbing tooltip.
+            - **Sinkronisasi Cloud Firestore**: Tarik dan sinkronkan riwayat lari antar perangkat secara otomatis maupun manual.
+            - **Modern Athletic Dark UI**: Desain antarmuka baru yang lebih bersih, kontras tinggi, non-AI generic aesthetic, dan responsif.
+            - **Peta Rute & Heatmap 3D**: Visualisasi lintasan lari elevasi dan zona kecepatan.
             
             Unduh file `.apk` di bawah dan pasang langsung di perangkat Android Anda.
         env:

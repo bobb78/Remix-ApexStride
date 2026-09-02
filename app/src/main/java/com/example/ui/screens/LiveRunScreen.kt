@@ -81,7 +81,7 @@ import com.example.ui.theme.TextSecondary
 import java.util.Locale
 
 enum class LiveRunDisplayMode {
-    TRACK_LAP_400M,
+    TRACK_LAP_100M,
     KM_TELEMETRY,
     MAP_3D
 }
@@ -98,7 +98,7 @@ fun LiveRunScreen(
 ) {
     val isTrackSession = telemetry.activityType.contains("Track", ignoreCase = true)
     var displayMode by remember(isTrackSession) {
-        mutableStateOf(if (isTrackSession) LiveRunDisplayMode.TRACK_LAP_400M else LiveRunDisplayMode.KM_TELEMETRY)
+        mutableStateOf(if (isTrackSession) LiveRunDisplayMode.TRACK_LAP_100M else LiveRunDisplayMode.KM_TELEMETRY)
     }
 
     Column(
@@ -181,7 +181,7 @@ fun LiveRunScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Mode Selector Tabs (Putaran 400m vs Telemetry KM vs Peta 3D)
+            // Mode Selector Tabs (Putaran 100m vs Telemetry KM vs Peta 3D)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +192,7 @@ fun LiveRunScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 listOf(
-                    LiveRunDisplayMode.TRACK_LAP_400M to "Putaran (400m)",
+                    LiveRunDisplayMode.TRACK_LAP_100M to "Putaran (100m)",
                     LiveRunDisplayMode.KM_TELEMETRY to "Jarak (KM)",
                     LiveRunDisplayMode.MAP_3D to "Peta 3D"
                 ).forEach { (mode, title) ->
@@ -217,7 +217,7 @@ fun LiveRunScreen(
             }
         }
 
-        // 2. Main Center: 400m Track Stadium Gauge / Kilometers Telemetry / 3D Map
+        // 2. Main Center: 100m Track Stadium Gauge / Kilometers Telemetry / 3D Map
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -226,7 +226,7 @@ fun LiveRunScreen(
             contentAlignment = Alignment.Center
         ) {
             when (displayMode) {
-                LiveRunDisplayMode.TRACK_LAP_400M -> {
+                LiveRunDisplayMode.TRACK_LAP_100M -> {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -259,7 +259,7 @@ fun LiveRunScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Target ${telemetry.targetLaps} Putaran (${telemetry.targetLaps * 400}m)",
+                                        text = "Target ${telemetry.targetLaps} Putaran (${telemetry.targetLaps * 100}m)",
                                         fontSize = 11.sp,
                                         color = TextSecondary,
                                         fontWeight = FontWeight.Bold
@@ -312,7 +312,7 @@ fun LiveRunScreen(
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Putaran 400m Summary Tag
+                            // Putaran 100m Summary Tag
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -377,7 +377,7 @@ fun LiveRunScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatTile(
-                    label = if (displayMode == LiveRunDisplayMode.TRACK_LAP_400M) "Pace Putaran" else "Pace Rata-rata",
+                    label = if (displayMode == LiveRunDisplayMode.TRACK_LAP_100M) "Pace Putaran" else "Pace Rata-rata",
                     value = formatPace(telemetry.avgPaceSecondsPerKm),
                     unit = "/KM",
                     icon = Icons.Default.Speed,
@@ -388,7 +388,7 @@ fun LiveRunScreen(
                 StatTile(
                     label = "Total Putaran",
                     value = "${telemetry.completedLaps}",
-                    unit = "x400m",
+                    unit = "x100m",
                     icon = Icons.Default.Timelapse,
                     accentColor = AcidYellow,
                     modifier = Modifier.weight(1f)
@@ -396,7 +396,7 @@ fun LiveRunScreen(
             }
 
             // If in Track Lap mode and has completed laps, show recent laps chart
-            if (displayMode == LiveRunDisplayMode.TRACK_LAP_400M && telemetry.laps.isNotEmpty()) {
+            if (displayMode == LiveRunDisplayMode.TRACK_LAP_100M && telemetry.laps.isNotEmpty()) {
                 TrackLapsBarChart(
                     laps = telemetry.laps.takeLast(3),
                     modifier = Modifier.fillMaxWidth()

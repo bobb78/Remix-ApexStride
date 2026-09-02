@@ -38,7 +38,7 @@ enum class RunTrackingState {
 
 data class LiveRunTelemetry(
     val state: RunTrackingState = RunTrackingState.IDLE,
-    val activityType: String = "Lari", // "Lari", "Lari Track 400m", or "Jalan Kaki"
+    val activityType: String = "Lari", // "Lari", "Lari Track 100m", or "Jalan Kaki"
     val elapsedSeconds: Long = 0L,
     val activeMovingSeconds: Long = 0L,
     val distanceMeters: Double = 0.0,
@@ -60,26 +60,26 @@ data class LiveRunTelemetry(
     val currentLapDurationSeconds: Long = 0L,
     val targetLaps: Int = 0,
     val isSimulationMode: Boolean = true,
-    val isVoiceCoachEnabled: Boolean = true,
+    val isVoiceCoachEnabled: Boolean = false,
     val currentSplitTimeSeconds: Long = 0L
 ) {
     val distanceKm: Double
         get() = distanceMeters / 1000.0
 
     val currentLapProgressPercent: Float
-        get() = (currentLapMeters / 400.0).coerceIn(0.0, 1.0).toFloat()
+        get() = (currentLapMeters / 100.0).coerceIn(0.0, 1.0).toFloat()
 
     val currentLapNumber: Int
         get() = completedLaps + 1
 
     val remainingLapMeters: Double
-        get() = (400.0 - currentLapMeters).coerceAtLeast(0.0)
+        get() = (100.0 - currentLapMeters).coerceAtLeast(0.0)
 
     val totalLapsCalculated: Double
-        get() = distanceMeters / 400.0
+        get() = distanceMeters / 100.0
 
     val formattedLapMeters: String
-        get() = "${currentLapMeters.toInt()}m / 400m"
+        get() = "${currentLapMeters.toInt()}m / 100m"
 }
 
 class LiveRunTracker(private val context: Context) {
@@ -163,9 +163,9 @@ class LiveRunTracker(private val context: Context) {
 
         val welcomeMsg = if (isTrack) {
             if (targetLaps > 0) {
-                "Sesi Lari Track 400 meter dimulai! Target $targetLaps putaran."
+                "Sesi Lari Track 100 meter dimulai! Target $targetLaps putaran."
             } else {
-                "Sesi Lari Track 400 meter dimulai! 1 putaran sama dengan 400 meter. Selamat berlari!"
+                "Sesi Lari Track 100 meter dimulai! 1 putaran sama dengan 100 meter. Selamat berlari!"
             }
         } else {
             "Sesi $activityType dimulai! Selamat berolahraga."
@@ -258,10 +258,10 @@ class LiveRunTracker(private val context: Context) {
             )
         }
 
-        // Add remaining partial lap if any (> 80m)
+        // Add remaining partial lap if any (> 20m)
         val finalLaps = current.laps.toMutableList()
         val remainingLapDist = current.distanceMeters - lastLapDistanceMeters
-        if (remainingLapDist > 80.0) {
+        if (remainingLapDist > 20.0) {
             val partialLapDur = current.elapsedSeconds - lapStartSeconds
             val partialLapPace = if (remainingLapDist > 0) ((partialLapDur / (remainingLapDist / 1000.0)).toInt()) else finalAvgPace
             finalLaps.add(
@@ -276,12 +276,12 @@ class LiveRunTracker(private val context: Context) {
             )
         }
 
-        val totalLapsCount = (current.distanceMeters / 400.0)
-        val lapsSpeech = if (totalLapsCount >= 1.0) "Total ${String.format(Locale.US, "%.1f", totalLapsCount)} putaran empat ratus meter." else ""
+        val totalLapsCount = (current.distanceMeters / 100.0)
+        val lapsSpeech = if (totalLapsCount >= 1.0) "Total ${String.format(Locale.US, "%.1f", totalLapsCount)} putaran seratus meter." else ""
         speakVoiceCue("Sesi latihan selesai! Total jarak ${String.format(Locale.US, "%.2f", current.distanceKm)} kilometer. $lapsSpeech")
 
         val title = when (current.activityType) {
-            "Lari Track 400m" -> "Sesi Lari Track 400m (${String.format(Locale.US, "%.1f", totalLapsCount)} Putaran)"
+            "Lari Track 100m", "Lari Track 150m", "Lari Track 400m" -> "Sesi Lari Track 100m (${String.format(Locale.US, "%.1f", totalLapsCount)} Putaran)"
             "Jalan Kaki" -> "Sesi Jalan Kaki Outdoor"
             else -> "Sesi Lari Outdoor"
         }
@@ -367,10 +367,10 @@ class LiveRunTracker(private val context: Context) {
         simulationJob = scope.launch {
             val earthRadius = 6371000.0
             val isTrack = activityType.contains("Track", ignoreCase = true)
-            // Radius ~63.66m gives exactly 2*pi*r = 400m perimeter for a real athletic oval track!
-            val radiusMeters = if (isTrack) 63.66 else 350.0
+            // Radius ~15.91m gives exactly 2*pi*r = 100m perimeter for track!
+            val radiusMeters = if (isTrack) 15.91 else 350.0
             val isRunning = activityType != "Jalan Kaki"
-            val angularSpeed = if (isTrack) 0.055 else if (isRunning) 0.045 else 0.018
+            val angularSpeed = if (isTrack) 0.11 else if (isRunning) 0.045 else 0.018
             val baseSpeedMs = if (isRunning) 3.5f else 1.35f
 
             while (isActive) {
@@ -424,17 +424,17 @@ class LiveRunTracker(private val context: Context) {
                             speakSplitAnnouncement(kmNum, splitPace)
                         }
 
-                        // 2. Check for 400m Track Lap completion (every 400m)
+                        // 2. Check for 100m Track Lap completion (every 100m)
                         val laps = prev.laps.toMutableList()
-                        if (newDist - lastLapDistanceMeters >= 400.0) {
+                        if (newDist - lastLapDistanceMeters >= 100.0) {
                             val lapNum = laps.size + 1
                             val lapDur = prev.elapsedSeconds - lapStartSeconds
-                            val lapPace = if (lapDur > 0) ((lapDur / 0.4).toInt()) else prev.avgPaceSecondsPerKm
+                            val lapPace = if (lapDur > 0) ((lapDur / 0.10).toInt()) else prev.avgPaceSecondsPerKm
                             laps.add(
                                 TrackLap(
                                     lapNumber = lapNum,
                                     durationSeconds = lapDur,
-                                    distanceMeters = 400.0,
+                                    distanceMeters = 100.0,
                                     paceSecondsPerKm = lapPace,
                                     avgHeartRateBpm = prev.estimatedHeartRateBpm,
                                     avgCadenceSpm = prev.currentCadenceSpm
@@ -455,7 +455,7 @@ class LiveRunTracker(private val context: Context) {
                             (112 + (Math.sin(simAngle * 3) * 3)).toInt()
                         }
 
-                        val statusLabel = if (isTrack) "Lari Track 400m" else if (isRunning) "Berlari Aktif" else "Jalan Kaki Aktif"
+                        val statusLabel = if (isTrack) "Lari Track 100m" else if (isRunning) "Berlari Aktif" else "Jalan Kaki Aktif"
 
                         prev.copy(
                             distanceMeters = newDist,
@@ -533,7 +533,7 @@ class LiveRunTracker(private val context: Context) {
 
             val isTrack = _telemetry.value.activityType.contains("Track", ignoreCase = true)
             val statusText = if (isTrack) {
-                "Lari Track 400m (${String.format(Locale.US, "%.1f", rawSpeedMs * 3.6)} km/jam)"
+                "Lari Track 100m (${String.format(Locale.US, "%.1f", rawSpeedMs * 3.6)} km/jam)"
             } else if (isRunning) {
                 "Berlari Aktif (${String.format(Locale.US, "%.1f", rawSpeedMs * 3.6)} km/jam)"
             } else {
@@ -572,17 +572,17 @@ class LiveRunTracker(private val context: Context) {
                     speakSplitAnnouncement(kmNum, splitDur.toInt())
                 }
 
-                // 2. 400m Track Lap check (every 400m)
+                // 2. 100m Track Lap check (every 100m)
                 val laps = prev.laps.toMutableList()
-                if (newDist - lastLapDistanceMeters >= 400.0) {
+                if (newDist - lastLapDistanceMeters >= 100.0) {
                     val lapNum = laps.size + 1
                     val lapDur = prev.elapsedSeconds - lapStartSeconds
-                    val lapPace = if (lapDur > 0) ((lapDur / 0.4).toInt()) else prev.avgPaceSecondsPerKm
+                    val lapPace = if (lapDur > 0) ((lapDur / 0.10).toInt()) else prev.avgPaceSecondsPerKm
                     laps.add(
                         TrackLap(
                             lapNumber = lapNum,
                             durationSeconds = lapDur,
-                            distanceMeters = 400.0,
+                            distanceMeters = 100.0,
                             paceSecondsPerKm = lapPace,
                             avgHeartRateBpm = prev.estimatedHeartRateBpm,
                             avgCadenceSpm = dynamicCadence
@@ -639,7 +639,7 @@ class LiveRunTracker(private val context: Context) {
         val sec = durationSeconds % 60
         val timeStr = if (min > 0) "$min menit $sec detik" else "$sec detik"
         val paceText = formatPace(paceSecondsPerKm)
-        val msg = "Putaran $lapNumber (400 meter) selesai! Waktu putaran: $timeStr, pace: $paceText per kilometer."
+        val msg = "Putaran $lapNumber (100 meter) selesai! Waktu putaran: $timeStr, pace: $paceText per kilometer."
         speakVoiceCue(msg)
     }
 

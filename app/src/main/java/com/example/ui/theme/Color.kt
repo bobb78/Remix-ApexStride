@@ -13,11 +13,12 @@ val AcidYellow = Color(0xFFFDE047)
 val CyberGreen = Color(0xFF34D399)
 
 // Immersive UI Deep Obsidian & Slate Backgrounds
-val DarkObsidian = Color(0xFF0A0C0E)   // #0A0C0E Immersive Dark Canvas
-val SlateDark = Color(0xFF0F141A)
-val SurfaceDark = Color(0xFF12171E)
-val SurfaceElevated = Color(0xFF18202A)
-val SurfaceBorder = Color(0xFF232D3A)
+val DarkObsidian = Color(0xFF090B0E)   // #090B0E True deep performance canvas
+val SlateDark = Color(0xFF0E131A)
+val SurfaceDark = Color(0xFF131922)
+val SurfaceElevated = Color(0xFF1B2430)
+val SurfaceHighlight = Color(0xFF243040)
+val SurfaceBorder = Color(0xFF243042)
 val SurfaceBorderActive = Color(0xFFD4FF5F)
 
 // Text Colors
@@ -27,6 +28,9 @@ val TextMuted = Color(0xFF64748B)
 
 // Immersive Glows and Overlays
 val VoltGlow = Color(0x4DD4FF5F)
-val GlassSurface = Color(0xB312171E)
-val GlassBorder = Color(0x4D334155)
+val GlassSurface = Color(0xCC131922)
+val GlassBorder = Color(0x4D38BDF8)
 val GlassLime = Color(0x26D4FF5F)
+val CardGradStart = Color(0xFF161E28)
+val CardGradEnd = Color(0xFF0E141C)
+

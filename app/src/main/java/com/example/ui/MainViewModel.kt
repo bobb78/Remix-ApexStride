@@ -88,6 +88,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val isSignedIn: StateFlow<Boolean> = authManager.isSignedIn
 
+    // Firestore sync loading state
+    private val _isSyncingFirestore = MutableStateFlow(false)
+    val isSyncingFirestore: StateFlow<Boolean> = _isSyncingFirestore.asStateFlow()
+
+    fun syncFirestoreRuns() {
+        viewModelScope.launch {
+            _isSyncingFirestore.value = true
+            try {
+                val uid = userProfile.value.uid.ifEmpty { "apex_runner_pro" }
+                runRepository.fetchAndSyncFromFirestore(uid)
+            } finally {
+                _isSyncingFirestore.value = false
+            }
+        }
+    }
+
     // Live Run Telemetry
     val liveTelemetry: StateFlow<LiveRunTelemetry> = liveRunTracker.telemetry
 

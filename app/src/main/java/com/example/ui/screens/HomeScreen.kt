@@ -62,13 +62,17 @@ import com.example.data.model.UserProfile
 import com.example.ui.components.PaceHeatmap3DCanvas
 import com.example.ui.theme.AcidYellow
 import com.example.ui.theme.BlazeOrange
+import com.example.ui.theme.CardGradEnd
+import com.example.ui.theme.CardGradStart
 import com.example.ui.theme.DarkObsidian
 import com.example.ui.theme.ElectricCyan
 import com.example.ui.theme.HyperCoral
 import com.example.ui.theme.NeonLime
+import com.example.ui.theme.SlateDark
 import com.example.ui.theme.SurfaceBorder
 import com.example.ui.theme.SurfaceDark
 import com.example.ui.theme.SurfaceElevated
+import com.example.ui.theme.SurfaceHighlight
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -106,11 +110,11 @@ fun HomeScreen(
             )
         }
 
-        // 3. Featured 400m Track Stadium Card (1 Putaran = 400m)
+        // 3. Featured 100m Track Stadium Card (1 Putaran = 100m)
         item {
             TrackLapModeCard(
                 onStartTrackRun = { isSim, targetLaps ->
-                    onStartRun(isSim, "Lari Track 400m", targetLaps)
+                    onStartRun(isSim, "Lari Track 100m", targetLaps)
                 },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -201,7 +205,7 @@ fun HomeScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Mulai lari sekarang untuk merekam rute, split 1km, dan putaran 400m.",
+                            text = "Mulai lari sekarang untuk merekam rute, split 1km, dan putaran 100m.",
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -228,25 +232,25 @@ fun TrackLapModeCard(
     var selectedTargetLaps by remember { mutableIntStateOf(0) }
     val lapOptions = listOf(
         0 to "Bebas",
-        5 to "5 Putaran (2km)",
-        10 to "10 Putaran (4km)",
-        12 to "12.5 Putaran (5km)",
-        25 to "25 Putaran (10km)"
+        5 to "5 Putaran (500m)",
+        10 to "10 Putaran (1km)",
+        20 to "20 Putaran (2km)",
+        50 to "50 Putaran (5km)"
     )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        SurfaceDark,
-                        Color(0xFF1E1712)
+                        CardGradStart,
+                        CardGradEnd
                     )
                 )
             )
-            .border(1.dp, AcidYellow.copy(alpha = 0.4f), RoundedCornerShape(28.dp))
+            .border(1.dp, AcidYellow.copy(alpha = 0.35f), RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -258,13 +262,14 @@ fun TrackLapModeCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(AcidYellow.copy(alpha = 0.2f)),
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AcidYellow.copy(alpha = 0.15f))
+                            .border(1.dp, AcidYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -283,7 +288,7 @@ fun TrackLapModeCard(
                             letterSpacing = 1.2.sp
                         )
                         Text(
-                            text = "1 Putaran = 400 Meter",
+                            text = "1 Putaran = 100 Meter",
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary,
                             fontWeight = FontWeight.ExtraBold
@@ -293,21 +298,22 @@ fun TrackLapModeCard(
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceElevated)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(SurfaceHighlight)
+                        .border(1.dp, SurfaceBorder, RoundedCornerShape(10.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "400M / LAP",
+                        text = "100M / LAP",
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         color = NeonLime
                     )
                 }
             }
 
             Text(
-                text = "Deteksi putaran otomatis setiap 400 meter, hitung waktu per putaran, dan panduan suara audio coach.",
+                text = "Deteksi putaran otomatis setiap 100 meter, hitung waktu per putaran, dan catat split lap presisi.",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextSecondary
             )
@@ -324,23 +330,23 @@ fun TrackLapModeCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     lapOptions.take(3).forEach { (laps, label) ->
                         val isSelected = selectedTargetLaps == laps
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(if (isSelected) AcidYellow else SurfaceElevated)
-                                .border(1.dp, if (isSelected) AcidYellow else SurfaceBorder, RoundedCornerShape(14.dp))
+                                .border(1.dp, if (isSelected) AcidYellow else SurfaceBorder, RoundedCornerShape(12.dp))
                                 .clickable { selectedTargetLaps = laps }
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = if (laps == 0) "Bebas" else "$laps Lap",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isSelected) DarkObsidian else TextPrimary
                             )
@@ -349,7 +355,7 @@ fun TrackLapModeCard(
                 }
             }
 
-            // Action Buttons (Outdoor GPS Track vs Simulasi 400m)
+            // Action Buttons (Outdoor GPS Track vs Simulasi 100m)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -358,7 +364,7 @@ fun TrackLapModeCard(
                     onClick = { onStartTrackRun(false, selectedTargetLaps) },
                     modifier = Modifier
                         .weight(1.2f)
-                        .height(48.dp)
+                        .height(50.dp)
                         .testTag("start_track_gps_button"),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -375,7 +381,7 @@ fun TrackLapModeCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Mulai Track GPS",
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Black
                     )
                 }
@@ -384,11 +390,11 @@ fun TrackLapModeCard(
                     onClick = { onStartTrackRun(true, selectedTargetLaps) },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp)
+                        .height(50.dp)
                         .testTag("start_track_simulation_button"),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SurfaceElevated,
+                        containerColor = SurfaceHighlight,
                         contentColor = TextPrimary
                     )
                 ) {
@@ -400,7 +406,7 @@ fun TrackLapModeCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Simulasi 400m",
+                        text = "Simulasi 100m",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -546,9 +552,16 @@ fun WeeklyProgressCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(SurfaceDark.copy(alpha = 0.8f))
-            .border(1.dp, SurfaceBorder, RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        CardGradStart,
+                        CardGradEnd
+                    )
+                )
+            )
+            .border(1.dp, SurfaceBorder, RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Column {
@@ -588,16 +601,17 @@ fun WeeklyProgressCard(
 
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(52.dp)
                         .clip(CircleShape)
-                        .background(SurfaceElevated),
+                        .background(SurfaceHighlight)
+                        .border(1.dp, SurfaceBorder, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${(progress * 100).toInt()}%",
                         style = MaterialTheme.typography.labelLarge,
                         color = NeonLime,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.Black
                     )
                 }
             }
@@ -630,39 +644,44 @@ fun ActivityModeLauncher(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(18.dp))
-                .background(SurfaceDark)
-                .border(1.dp, SurfaceBorder, RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(SurfaceDark, SlateDark)
+                    )
+                )
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(20.dp))
                 .clickable { onStartRun(false, "Jalan Kaki") }
-                .padding(14.dp)
+                .padding(16.dp)
         ) {
             Column {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(ElectricCyan.copy(alpha = 0.15f)),
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(ElectricCyan.copy(alpha = 0.15f))
+                        .border(1.dp, ElectricCyan.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.DirectionsWalk,
                         contentDescription = "Walk",
                         tint = ElectricCyan,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Jalan Kaki GPS",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Pelacakan langkah & rute",
+                    text = "Pelacakan rute & langkah",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextSecondary,
-                    fontSize = 10.sp
+                    fontSize = 11.sp
                 )
             }
         }
@@ -671,31 +690,36 @@ fun ActivityModeLauncher(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(18.dp))
-                .background(SurfaceDark)
-                .border(1.dp, SurfaceBorder, RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(SurfaceDark, SlateDark)
+                    )
+                )
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(20.dp))
                 .clickable { onStartRun(true, "Lari") }
-                .padding(14.dp)
+                .padding(16.dp)
         ) {
             Column {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(AcidYellow.copy(alpha = 0.15f)),
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AcidYellow.copy(alpha = 0.15f))
+                        .border(1.dp, AcidYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.FlashOn,
                         contentDescription = "Simulasi",
                         tint = AcidYellow,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Simulasi Lintasan",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
@@ -703,7 +727,7 @@ fun ActivityModeLauncher(
                     text = "Uji HUD & Peta 3D",
                     style = MaterialTheme.typography.labelSmall,
                     color = TextSecondary,
-                    fontSize = 10.sp
+                    fontSize = 11.sp
                 )
             }
         }
@@ -720,7 +744,14 @@ fun PersonalAnalyticsQuickCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(SurfaceDark.copy(alpha = 0.8f))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        SurfaceElevated,
+                        SurfaceDark
+                    )
+                )
+            )
             .border(1.dp, SurfaceBorder, RoundedCornerShape(24.dp))
             .clickable { onNavigateToAnalytics() }
             .padding(18.dp)
@@ -737,9 +768,10 @@ fun PersonalAnalyticsQuickCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(NeonLime.copy(alpha = 0.15f)),
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(NeonLime.copy(alpha = 0.15f))
+                        .border(1.dp, NeonLime.copy(alpha = 0.3f), RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -755,7 +787,7 @@ fun PersonalAnalyticsQuickCard(
                         text = "ANALISIS & REKOR ATLETIK",
                         style = MaterialTheme.typography.labelSmall,
                         color = NeonLime,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     )
                     Text(
@@ -784,9 +816,16 @@ fun ActivityRunCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorder, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        SurfaceDark,
+                        CardGradEnd
+                    )
+                )
+            )
+            .border(1.dp, SurfaceBorder, RoundedCornerShape(22.dp))
             .clickable { onClick() }
             .padding(16.dp)
     ) {
@@ -802,12 +841,20 @@ fun ActivityRunCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = if (run.activityType == "Lari") Icons.Default.DirectionsRun else Icons.Default.DirectionsWalk,
-                            contentDescription = run.activityType,
-                            tint = if (run.activityType == "Lari") NeonLime else ElectricCyan,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(if (run.activityType == "Lari") NeonLime.copy(alpha = 0.15f) else ElectricCyan.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (run.activityType == "Lari") Icons.Default.DirectionsRun else Icons.Default.DirectionsWalk,
+                                contentDescription = run.activityType,
+                                tint = if (run.activityType == "Lari") NeonLime else ElectricCyan,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
                         Text(
                             text = run.title,
                             style = MaterialTheme.typography.titleMedium,
@@ -818,14 +865,16 @@ fun ActivityRunCard(
                     Text(
                         text = run.formattedDate,
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary
+                        color = TextSecondary,
+                        modifier = Modifier.padding(start = 30.dp)
                     )
                 }
 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(SurfaceElevated)
+                        .background(SurfaceHighlight)
+                        .border(1.dp, SurfaceBorder, RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
@@ -850,7 +899,8 @@ fun ActivityRunCard(
                     points = run.routePoints,
                     modifier = Modifier
                         .size(100.dp)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, SurfaceBorder, RoundedCornerShape(14.dp)),
                     isLive = false,
                     showGrid = false,
                     initialIs3D = true
@@ -876,7 +926,7 @@ fun ActivityRunCard(
                                 text = "${run.formattedDistance} km",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = TextPrimary,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.Black
                             )
                         }
 
@@ -891,7 +941,7 @@ fun ActivityRunCard(
                                 text = "${run.formattedPace}/km",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = NeonLime,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.Black
                             )
                         }
                     }

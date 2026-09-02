@@ -55,6 +55,25 @@ class RunRepository(
         run
     }
 
+    suspend fun fetchAndSyncFromFirestore(userId: String = "apex_runner_pro"): Result<List<RunActivity>> = withContext(Dispatchers.IO) {
+        val result = firestoreSyncManager.fetchUserRunsFromFirestore(userId)
+        if (result.isSuccess) {
+            val remoteRuns = result.getOrNull() ?: emptyList()
+            for (run in remoteRuns) {
+                val entity = RunEntity.fromDomain(
+                    domain = run,
+                    routePointsJson = RunJsonConverter.routePointsToJson(run.routePoints),
+                    splitsJson = RunJsonConverter.splitsToJson(run.splits),
+                    lapsJson = RunJsonConverter.lapsToJson(run.laps)
+                )
+                runDao.insertRun(entity)
+            }
+            Result.success(remoteRuns)
+        } else {
+            result
+        }
+    }
+
     suspend fun getRunById(id: String): RunActivity? = withContext(Dispatchers.IO) {
         val entity = runDao.getRunById(id) ?: return@withContext null
         val points = RunJsonConverter.jsonToRoutePoints(entity.routePointsJson)

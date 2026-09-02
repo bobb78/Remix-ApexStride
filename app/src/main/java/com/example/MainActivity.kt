@@ -119,6 +119,7 @@ fun ApexStrideApp(viewModel: MainViewModel) {
     val liveTelemetry by viewModel.liveTelemetry.collectAsState()
     val summaryRun by viewModel.summaryRun.collectAsState()
     val isSignedIn by viewModel.isSignedIn.collectAsState()
+    val isSyncingFirestore by viewModel.isSyncingFirestore.collectAsState()
 
     // Handle Hardware Back Button
     BackHandler(enabled = currentDest != AppDestination.HOME) {
@@ -204,7 +205,9 @@ fun ApexStrideApp(viewModel: MainViewModel) {
                     AppDestination.ANALYTICS -> {
                         PerformanceAnalyticsScreen(
                             metrics = performanceMetrics,
-                            recentRuns = allRuns
+                            recentRuns = allRuns,
+                            isSyncingFirestore = isSyncingFirestore,
+                            onRefreshFirestore = { viewModel.syncFirestoreRuns() }
                         )
                     }
 

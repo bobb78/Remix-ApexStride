@@ -53,9 +53,12 @@ import com.example.data.model.PerformanceMetrics
 import com.example.data.model.RunActivity
 import com.example.data.model.formatDuration
 import com.example.data.model.formatPace
+import com.example.ui.components.PaceProgressionLineChart
 import com.example.ui.components.StatTile
 import com.example.ui.theme.AcidYellow
 import com.example.ui.theme.BlazeOrange
+import com.example.ui.theme.CardGradEnd
+import com.example.ui.theme.CardGradStart
 import com.example.ui.theme.DarkObsidian
 import com.example.ui.theme.ElectricCyan
 import com.example.ui.theme.HyperCoral
@@ -63,6 +66,7 @@ import com.example.ui.theme.NeonLime
 import com.example.ui.theme.SurfaceBorder
 import com.example.ui.theme.SurfaceDark
 import com.example.ui.theme.SurfaceElevated
+import com.example.ui.theme.SurfaceHighlight
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -72,10 +76,23 @@ import java.util.Locale
 fun PerformanceAnalyticsScreen(
     metrics: PerformanceMetrics,
     recentRuns: List<RunActivity>,
+    isSyncingFirestore: Boolean = false,
+    onRefreshFirestore: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedDistanceKm by remember { mutableFloatStateOf(5.0f) }
     var targetPaceMinutes by remember { mutableFloatStateOf(5.0f) } // 5'00"/km
+    var selectedTimelineFilter by remember { mutableStateOf("Semua") }
+
+    val filteredTimelineRuns = remember(recentRuns, selectedTimelineFilter) {
+        val now = System.currentTimeMillis()
+        when (selectedTimelineFilter) {
+            "7 Hari" -> recentRuns.filter { it.timestamp >= now - (7L * 86400000L) }
+            "30 Hari" -> recentRuns.filter { it.timestamp >= now - (30L * 86400000L) }
+            "Lari Saja" -> recentRuns.filter { it.activityType == "Lari" }
+            else -> recentRuns
+        }
+    }
 
     val calculatedTargetSeconds = (selectedDistanceKm * targetPaceMinutes * 60).toLong()
 
@@ -117,6 +134,42 @@ fun PerformanceAnalyticsScreen(
             }
         }
 
+        // 2. Pace Progression Over Time (Recharts Line Chart Style + Firestore Sync)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Timeline Filter Chips
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    listOf("Semua", "30 Hari", "7 Hari", "Lari Saja").forEach { filter ->
+                        val isSelected = selectedTimelineFilter == filter
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) NeonLime else SurfaceElevated)
+                                .clickable { selectedTimelineFilter = filter }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = filter,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) DarkObsidian else TextSecondary
+                            )
+                        }
+                    }
+                }
+
+                PaceProgressionLineChart(
+                    runs = filteredTimelineRuns,
+                    isSyncingFirestore = isSyncingFirestore,
+                    onRefreshFirestore = onRefreshFirestore
+                )
+            }
+        }
+
         // 2. VO2 Max Hero Card
         item {
             Box(
@@ -124,8 +177,8 @@ fun PerformanceAnalyticsScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp))
                     .background(
-                        Brush.verticalGradient(
-                            listOf(SurfaceDark, SurfaceElevated)
+                        Brush.linearGradient(
+                            listOf(CardGradStart, CardGradEnd)
                         )
                     )
                     .border(1.dp, SurfaceBorder, RoundedCornerShape(24.dp))
@@ -168,6 +221,7 @@ fun PerformanceAnalyticsScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(ElectricCyan.copy(alpha = 0.15f))
+                                .border(1.dp, ElectricCyan.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(

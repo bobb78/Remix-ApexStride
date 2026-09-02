@@ -633,7 +633,7 @@ fun TrackLapsSummarySection(
                         )
                     }
                     Text(
-                        text = "ANALISIS PUTARAN TRACK (400M)",
+                        text = "ANALISIS PUTARAN TRACK (100M)",
                         style = MaterialTheme.typography.labelMedium,
                         color = AcidYellow,
                         fontWeight = FontWeight.Black,
@@ -697,7 +697,7 @@ fun TrackLapsSummarySection(
                             fontWeight = FontWeight.Black,
                             color = TextPrimary
                         )
-                        Text(text = "per 400 meter", fontSize = 10.sp, color = TextSecondary)
+                        Text(text = "per 100 meter", fontSize = 10.sp, color = TextSecondary)
                     }
                 }
             }

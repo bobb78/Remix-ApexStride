@@ -54,4 +54,65 @@ class FirestoreSyncManager {
             Result.failure(e)
         }
     }
+
+    suspend fun fetchUserRunsFromFirestore(userId: String): Result<List<RunActivity>> = withContext(Dispatchers.IO) {
+        val fs = firestore ?: return@withContext Result.success(emptyList())
+        try {
+            val snapshot = fs.collection("users")
+                .document(userId)
+                .collection("runs")
+                .orderBy("timestamp")
+                .get()
+                .await()
+
+            val runs = snapshot.documents.mapNotNull { doc ->
+                try {
+                    val id = doc.getString("id") ?: doc.id
+                    val title = doc.getString("title") ?: "Sesi Lari"
+                    val activityType = doc.getString("activityType") ?: "Lari"
+                    val timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
+                    val durationSeconds = doc.getLong("durationSeconds") ?: 0L
+                    val distanceMeters = doc.getDouble("distanceMeters") ?: 0.0
+                    val avgPaceSecondsPerKm = doc.getLong("avgPaceSecondsPerKm")?.toInt() ?: 0
+                    val caloriesBurned = doc.getLong("caloriesBurned")?.toInt() ?: 0
+                    val elevationGainMeters = doc.getLong("elevationGainMeters")?.toInt() ?: 0
+                    val avgCadenceSpm = doc.getLong("avgCadenceSpm")?.toInt() ?: 0
+                    val avgHeartRateBpm = doc.getLong("avgHeartRateBpm")?.toInt() ?: 0
+                    val routePointsJson = doc.getString("routePointsJson") ?: "[]"
+                    val splitsJson = doc.getString("splitsJson") ?: "[]"
+                    val lapsJson = doc.getString("lapsJson") ?: "[]"
+                    val feelingTag = doc.getString("feelingTag") ?: ""
+                    val shoeName = doc.getString("shoeName") ?: ""
+                    val notes = doc.getString("notes") ?: ""
+                    val weatherCondition = doc.getString("weatherCondition") ?: ""
+
+                    RunActivity(
+                        id = id,
+                        title = title,
+                        activityType = activityType,
+                        timestamp = timestamp,
+                        durationSeconds = durationSeconds,
+                        distanceMeters = distanceMeters,
+                        avgPaceSecondsPerKm = avgPaceSecondsPerKm,
+                        caloriesBurned = caloriesBurned,
+                        elevationGainMeters = elevationGainMeters,
+                        avgCadenceSpm = avgCadenceSpm,
+                        avgHeartRateBpm = avgHeartRateBpm,
+                        routePoints = RunJsonConverter.jsonToRoutePoints(routePointsJson),
+                        splits = RunJsonConverter.jsonToSplits(splitsJson),
+                        laps = RunJsonConverter.jsonToLaps(lapsJson),
+                        feelingTag = feelingTag,
+                        shoeName = shoeName,
+                        notes = notes,
+                        weatherCondition = weatherCondition
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            Result.success(runs)
+        } catch (e: Throwable) {
+            Result.failure(e)
+        }
+    }
 }
